@@ -19,7 +19,7 @@ replyOnUser: {
 
 
 },{
-    timestamps: true
+    timestamps: true, toJSON: {virtuals: true}
 })
 
 CommentSchema.virtual("replies",{
