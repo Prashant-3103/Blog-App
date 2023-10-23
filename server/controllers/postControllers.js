@@ -3,6 +3,7 @@ import Post from "../model/Post";
 import { fileRemover } from "../utils/fileRemover";
 import { v4 as uuidv4 } from "uuid";
 import Comment from "../model/Comment";
+import { json } from "express";
 const createPost = async (req, res, next) => {
   try {
     const post = new Post({
@@ -119,7 +120,13 @@ const post = await Post.findOne({slug: req.params.slug}).populate([
         path: 'replies',
         match: {
           check: true
-        }
+        },
+        populate: [
+          {
+            path: 'user',
+        select: ['avatar', 'name']
+          }
+        ]
       }
     ]
   }
@@ -140,13 +147,41 @@ next(error)
 
   const getAllPosts = async(req,res,next)=>{
 try {
-const posts = await Post.find({}).populate([
+const filter = req.query.searchKeyword;
+let where ={};
+if(filter)
+{
+where.title= {$regex: filter, $options: "i"  }
+}
+
+let query=Post.find(where)
+const page = parseInt(req.query.page) || 1;
+const pageSize = parseInt(req.query.limit) || 10;
+const skip = (page-1)*pageSize
+const total = await Post.find(where).countDocuments();
+const pages = Math.ceil(total/pageSize)
+if(page>pages)
+{
+  const error = new Error("No page found")
+  return next(error)
+
+}
+const result = await query.skip(skip).limit(pageSize).populate([
   {
     path: "user",
-    select: ["avatar", "name", "verified"]
-  }
-])
-res.json(posts)
+    select: ["avatar","name","verified"],
+  },
+]).sort({updateAt: "desc"})
+
+res.header({
+  'x-filter': filter,
+  'x-totalcount': JSON.stringify(total),
+  'x-currentpage': JSON.stringify(page),
+  'x-pagesize': JSON.stringify(pageSize),
+  'x-totalpagecount': JSON.stringify(pages)
+})
+
+return res.json(result)
 } catch (error) {
 next(error)
 }
