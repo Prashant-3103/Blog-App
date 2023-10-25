@@ -2,6 +2,7 @@ const express = require('express');
 import connectDB from './config/db';
 const dotenv = require('dotenv');
 import path from 'path'
+import cors from 'cors'
  import { errorResponseHandler, invalidPathHandler } from './middleware/errorHandler';
 //routes
 import userRoutes from './routes/userRoutes'
@@ -13,7 +14,8 @@ connectDB();
 
 const app = express();
 app.use(express.json());
- 
+app.use(cors())
+
 app.get('/', (req, res) => {
   res.send('Server is running');
 });
@@ -21,7 +23,7 @@ app.get('/', (req, res) => {
 app.use('/api/users',userRoutes)
 app.use('/api/posts',postRoutes)
 app.use('/api/comments',commentRoutes)
-
+ 
 //static assets
 
 

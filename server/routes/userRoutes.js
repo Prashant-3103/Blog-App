@@ -9,3 +9,4 @@ router.put('/updateProfile',authGuard,updateProfile)
 router.put('/updateProfilePicture',authGuard,updateProfilePicture)
 
 export default router
+ 
