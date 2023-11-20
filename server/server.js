@@ -14,7 +14,7 @@ connectDB();
 
 const app = express();
 app.use(express.json());
-app.use(cors())
+app.use(cors()) 
 
 app.get('/', (req, res) => {
   res.send('Server is running');
